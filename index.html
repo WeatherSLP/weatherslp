@@ -507,6 +507,115 @@
   .city-tab-sub { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
   .city-tab-temp { font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 700; color: var(--accent); margin-left: auto; min-width: 42px; text-align: right; }
 
+  /* Alert system */
+  .alerts-container {
+    position: fixed;
+    top: 80px; right: 20px;
+    z-index: 999;
+    display: flex; flex-direction: column; gap: 10px;
+    max-width: 360px; width: 100%;
+    pointer-events: none;
+  }
+  .alert-toast {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 14px 18px;
+    display: flex; align-items: flex-start; gap: 12px;
+    pointer-events: all;
+    animation: slideInRight 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    border-left: 4px solid;
+    position: relative;
+    overflow: hidden;
+  }
+  .alert-toast::before {
+    content: ''; position: absolute; inset: 0;
+    opacity: 0.06; pointer-events: none;
+  }
+  .alert-toast.storm { border-color: #ff6b35; background: rgba(255,107,53,0.12); }
+  .alert-toast.storm::before { background: #ff6b35; }
+  .alert-toast.rain { border-color: #5599ff; background: rgba(85,153,255,0.12); }
+  .alert-toast.rain::before { background: #5599ff; }
+  .alert-toast.wind { border-color: #00ff9d; background: rgba(0,255,157,0.12); }
+  .alert-toast.wind::before { background: #00ff9d; }
+  .alert-toast-icon { font-size: 26px; flex-shrink: 0; }
+  .alert-toast-body { flex: 1; }
+  .alert-toast-title { font-size: 13px; font-weight: 800; margin-bottom: 3px; }
+  .alert-toast.storm .alert-toast-title { color: #ff6b35; }
+  .alert-toast.rain .alert-toast-title { color: #5599ff; }
+  .alert-toast.wind .alert-toast-title { color: #00ff9d; }
+  .alert-toast-msg { font-size: 12px; color: var(--muted); line-height: 1.4; }
+  .alert-toast-city { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+  .alert-toast-close {
+    background: none; border: none; color: var(--muted);
+    cursor: pointer; font-size: 16px; padding: 0; line-height: 1;
+    transition: color 0.2s; flex-shrink: 0;
+  }
+  .alert-toast-close:hover { color: var(--text); }
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(60px) scale(0.9); }
+    to { opacity: 1; transform: translateX(0) scale(1); }
+  }
+  @keyframes slideOutRight {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(60px); }
+  }
+
+  /* Alert panel */
+  .alert-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    animation: fadeUp 0.4s ease both;
+  }
+  .alert-panel-header {
+    padding: 16px 22px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer; user-select: none;
+  }
+  .alert-panel-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; font-weight: 700;
+  }
+  .alert-count {
+    background: #ff6b35; color: white;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; font-weight: 700;
+    padding: 2px 7px; border-radius: 20px;
+    min-width: 20px; text-align: center;
+  }
+  .alert-count.green { background: var(--accent3); color: #000; }
+  .alert-panel-toggle { color: var(--muted); font-size: 12px; font-family: 'IBM Plex Mono', monospace; }
+  .alert-panel-body { padding: 16px 22px; display: flex; flex-direction: column; gap: 10px; }
+  .alert-panel-body.collapsed { display: none; }
+
+  .alert-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  .alert-row.storm { border-color: rgba(255,107,53,0.4); background: rgba(255,107,53,0.06); }
+  .alert-row.rain { border-color: rgba(85,153,255,0.4); background: rgba(85,153,255,0.06); }
+  .alert-row.wind { border-color: rgba(0,255,157,0.4); background: rgba(0,255,157,0.06); }
+  .alert-row.ok { border-color: rgba(0,255,157,0.2); background: rgba(0,255,157,0.03); }
+  .alert-row-icon { font-size: 22px; }
+  .alert-row-info { flex: 1; }
+  .alert-row-city { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+  .alert-row-desc { font-size: 12px; color: var(--muted); }
+  .alert-row-level {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    padding: 3px 8px; border-radius: 20px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .level-ok { background: rgba(0,255,157,0.15); color: var(--accent3); }
+  .level-watch { background: rgba(255,204,0,0.15); color: #ffcc00; }
+  .level-warning { background: rgba(255,107,53,0.15); color: #ff6b35; }
+  .level-danger { background: rgba(255,0,0,0.2); color: #ff4444; }
+
   /* Footer */
   footer {
     position: relative; z-index: 2;
@@ -572,6 +681,9 @@
   <div class="loading-spinner"></div>
   <div class="loading-text">WeatherSLP — Obteniendo clima en tiempo real...</div>
 </div>
+
+<!-- Alerts toast container -->
+<div class="alerts-container" id="alertsContainer"></div>
 
 <header>
   <div class="logo">
@@ -670,6 +782,22 @@
       </div>
     </div>
     <div class="station-last-update">🕐 Última lectura: <span id="st-updated">cargando...</span></div>
+  </div>
+
+  <!-- Panel de Alertas Tempranas -->
+  <div class="alert-panel">
+    <div class="alert-panel-header" onclick="toggleAlertPanel()">
+      <div class="alert-panel-title">
+        ⚠️ Alertas Tempranas de Tormenta
+        <span class="alert-count" id="alertCount">0</span>
+      </div>
+      <div class="alert-panel-toggle" id="alertPanelToggle">▲ ocultar</div>
+    </div>
+    <div class="alert-panel-body" id="alertPanelBody">
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); text-align:center; padding:10px;">
+        Analizando condiciones meteorológicas...
+      </div>
+    </div>
   </div>
 
   <!-- City tabs -->
@@ -1353,11 +1481,195 @@ async function fetchStation() {
   }
 }
 
+// ============================================================
+// ALERT SYSTEM
+// ============================================================
+
+// Thresholds
+const ALERT_THRESHOLDS = {
+  rainRate:    { watch: 5,   warning: 15,  danger: 30  }, // mm/h
+  windSpeed:   { watch: 40,  warning: 60,  danger: 90  }, // km/h
+  windGust:    { watch: 50,  warning: 75,  danger: 100 }, // km/h
+  stormCode:   [95, 96, 99],  // WMO storm codes
+  heavyRain:   [65, 82],      // WMO heavy rain codes
+};
+
+let shownAlerts = new Set(); // avoid repeat toasts
+let alertPanelOpen = true;
+
+function toggleAlertPanel() {
+  alertPanelOpen = !alertPanelOpen;
+  document.getElementById('alertPanelBody').classList.toggle('collapsed', !alertPanelOpen);
+  document.getElementById('alertPanelToggle').textContent = alertPanelOpen ? '▲ ocultar' : '▼ ver alertas';
+}
+
+function getAlertLevel(value, thresholds) {
+  if (value >= thresholds.danger)  return 'danger';
+  if (value >= thresholds.warning) return 'warning';
+  if (value >= thresholds.watch)   return 'watch';
+  return 'ok';
+}
+
+function levelLabel(level) {
+  return { ok: 'Normal', watch: 'Vigilancia', warning: 'Advertencia', danger: 'Peligro' }[level];
+}
+
+function showToast(type, title, msg, city) {
+  const key = `${type}-${city}`;
+  if (shownAlerts.has(key)) return;
+  shownAlerts.add(key);
+
+  // Browser notification
+  if (Notification.permission === 'granted') {
+    new Notification(`⚠️ WeatherSLP — ${title}`, {
+      body: `${city}: ${msg}`,
+      icon: '🌩'
+    });
+  }
+
+  // Toast in page
+  const container = document.getElementById('alertsContainer');
+  const icons = { storm: '⛈', rain: '🌧', wind: '💨' };
+  const toast = document.createElement('div');
+  toast.className = `alert-toast ${type}`;
+  toast.innerHTML = `
+    <div class="alert-toast-icon">${icons[type]}</div>
+    <div class="alert-toast-body">
+      <div class="alert-toast-title">${title}</div>
+      <div class="alert-toast-msg">${msg}</div>
+      <div class="alert-toast-city">📍 ${city}</div>
+    </div>
+    <button class="alert-toast-close" onclick="dismissToast(this, '${key}')">✕</button>
+  `;
+  container.appendChild(toast);
+
+  // Auto-dismiss after 12 seconds
+  setTimeout(() => dismissToast(toast.querySelector('.alert-toast-close'), key), 12000);
+}
+
+function dismissToast(btn, key) {
+  const toast = btn.closest ? btn.closest('.alert-toast') : btn.parentElement;
+  if (!toast) return;
+  toast.style.animation = 'slideOutRight 0.3s ease both';
+  setTimeout(() => toast.remove(), 300);
+}
+
+function buildAlertRow(cityName, alerts) {
+  if (alerts.length === 0) {
+    return `
+      <div class="alert-row ok">
+        <div class="alert-row-icon">✅</div>
+        <div class="alert-row-info">
+          <div class="alert-row-city">${cityName}</div>
+          <div class="alert-row-desc">Sin alertas activas — condiciones normales</div>
+        </div>
+        <div class="alert-row-level level-ok">Normal</div>
+      </div>`;
+  }
+  return alerts.map(a => `
+    <div class="alert-row ${a.type}">
+      <div class="alert-row-icon">${a.icon}</div>
+      <div class="alert-row-info">
+        <div class="alert-row-city">${cityName}</div>
+        <div class="alert-row-desc">${a.desc}</div>
+      </div>
+      <div class="alert-row-level level-${a.level}">${levelLabel(a.level)}</div>
+    </div>`).join('');
+}
+
+async function checkAllAlerts() {
+  const panel = document.getElementById('alertPanelBody');
+  let totalAlerts = 0;
+  let html = '';
+
+  for (const [key, city] of Object.entries(CITIES)) {
+    try {
+      const data = await fetchWeather(city.lat, city.lon);
+      const c = data.current;
+      const d = data.daily;
+      const cityAlerts = [];
+
+      // Check storm weather code
+      if (ALERT_THRESHOLDS.stormCode.includes(c.weather_code)) {
+        cityAlerts.push({ type:'storm', icon:'⛈', level:'danger',
+          desc:`Tormenta eléctrica activa — código WMO ${c.weather_code}` });
+        showToast('storm', 'Tormenta Eléctrica', `Tormenta eléctrica detectada en ${city.name}`, city.name);
+      }
+
+      // Check heavy rain code
+      if (ALERT_THRESHOLDS.heavyRain.includes(c.weather_code)) {
+        cityAlerts.push({ type:'rain', icon:'🌧', level:'warning',
+          desc:`Lluvia intensa — ${getWeatherDesc(c.weather_code)}` });
+        showToast('rain', 'Lluvia Intensa', `Lluvia intensa en ${city.name}`, city.name);
+      }
+
+      // Check wind speed
+      const windKmh = c.wind_speed_10m;
+      const windLevel = getAlertLevel(windKmh, ALERT_THRESHOLDS.windSpeed);
+      if (windLevel !== 'ok') {
+        cityAlerts.push({ type:'wind', icon:'💨', level: windLevel,
+          desc:`Viento fuerte: ${Math.round(windKmh)} km/h` });
+        showToast('wind', 'Viento Fuerte', `Viento de ${Math.round(windKmh)} km/h en ${city.name}`, city.name);
+      }
+
+      // Check wind gust
+      const gustKmh = c.wind_gusts_10m;
+      const gustLevel = getAlertLevel(gustKmh, ALERT_THRESHOLDS.windGust);
+      if (gustLevel !== 'ok' && gustLevel !== windLevel) {
+        cityAlerts.push({ type:'wind', icon:'🌬', level: gustLevel,
+          desc:`Ráfaga peligrosa: ${Math.round(gustKmh)} km/h` });
+      }
+
+      // Check daily forecast for upcoming storms (next 2 days)
+      for (let i = 1; i <= 2; i++) {
+        if (d.weather_code[i] && ALERT_THRESHOLDS.stormCode.includes(d.weather_code[i])) {
+          const dayLabel = i === 1 ? 'mañana' : 'pasado mañana';
+          cityAlerts.push({ type:'storm', icon:'⛈', level:'watch',
+            desc:`Tormenta eléctrica pronosticada para ${dayLabel}` });
+        }
+        if (d.weather_code[i] && ALERT_THRESHOLDS.heavyRain.includes(d.weather_code[i])) {
+          const dayLabel = i === 1 ? 'mañana' : 'pasado mañana';
+          cityAlerts.push({ type:'rain', icon:'🌧', level:'watch',
+            desc:`Lluvia intensa pronosticada para ${dayLabel}` });
+        }
+      }
+
+      totalAlerts += cityAlerts.length;
+      html += buildAlertRow(city.name, cityAlerts);
+
+    } catch(e) {
+      html += `<div class="alert-row"><div class="alert-row-icon">❓</div>
+        <div class="alert-row-info"><div class="alert-row-city">${city.name}</div>
+        <div class="alert-row-desc">No se pudieron obtener datos</div></div></div>`;
+    }
+  }
+
+  panel.innerHTML = html;
+
+  // Update counter badge
+  const badge = document.getElementById('alertCount');
+  badge.textContent = totalAlerts;
+  badge.className = totalAlerts > 0 ? 'alert-count' : 'alert-count green';
+}
+
+// Request notification permission
+async function requestNotifications() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    await Notification.requestPermission();
+  }
+}
+
 init();
 
 // Fetch station immediately and every 5 minutes
 fetchStation();
 setInterval(fetchStation, 300000);
+
+// Check alerts on load and every 15 minutes
+requestNotifications().then(() => {
+  checkAllAlerts();
+  setInterval(checkAllAlerts, 900000);
+});
 </script>
 </body>
 </html>
