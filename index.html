@@ -416,6 +416,70 @@
   .wind-speed-center { font-size: 16px; font-weight: 700; }
   .wind-speed-unit { font-size: 9px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
 
+  /* Station card */
+  .station-card {
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 20px;
+    padding: 22px 26px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 40px rgba(0,212,255,0.1);
+    animation: fadeUp 0.4s ease both;
+  }
+  .station-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(to right, var(--accent), var(--accent3), var(--accent2));
+  }
+  .station-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+  }
+  .station-title {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .station-icon {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 0 16px rgba(0,212,255,0.35);
+  }
+  .station-name { font-size: 16px; font-weight: 800; }
+  .station-location { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .station-status {
+    display: flex; align-items: center; gap: 6px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    background: rgba(0,255,157,0.1); border: 1px solid rgba(0,255,157,0.3);
+    color: var(--accent3); padding: 5px 12px; border-radius: 20px;
+  }
+  .station-status.offline { background: rgba(255,107,53,0.1); border-color: rgba(255,107,53,0.3); color: var(--accent2); }
+  .station-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+  .station-metric {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    text-align: center;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .station-metric:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .station-metric-icon { font-size: 22px; margin-bottom: 6px; }
+  .station-metric-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 4px; }
+  .station-metric-value { font-size: 20px; font-weight: 800; color: var(--accent); }
+  .station-metric-unit { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .station-last-update { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 14px; text-align: right; }
+
+  @media (max-width: 1100px) { .station-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 700px) { .station-grid { grid-template-columns: repeat(2, 1fr); } }
+
   /* City tabs */
   .city-tabs {
     display: flex; gap: 10px; margin-bottom: 20px;
@@ -528,6 +592,85 @@
 
 <main>
   <div class="error-banner" id="errorBanner">⚠ No se pudo obtener datos. Usando ciudad de demostración.</div>
+
+  <!-- Mi Estación Meteorológica -->
+  <div class="station-card">
+    <div class="station-header">
+      <div class="station-title">
+        <div class="station-icon">📡</div>
+        <div>
+          <div class="station-name">Mi Estación Meteorológica</div>
+          <div class="station-location">San Cayetano, Armadillo de los Infante · SLP · Ambient Weather</div>
+        </div>
+      </div>
+      <div class="station-status" id="stationStatus">
+        <span class="live-dot"></span> EN VIVO
+      </div>
+    </div>
+    <div class="station-grid">
+      <div class="station-metric">
+        <div class="station-metric-icon">🌡</div>
+        <div class="station-metric-label">Temperatura</div>
+        <div class="station-metric-value" id="st-temp">--</div>
+        <div class="station-metric-unit">°C</div>
+      </div>
+      <div class="station-metric">
+        <div class="station-metric-icon">🌡</div>
+        <div class="station-metric-label">Sensación</div>
+        <div class="station-metric-value" id="st-feels">--</div>
+        <div class="station-metric-unit">°C</div>
+      </div>
+      <div class="station-metric">
+        <div class="station-metric-icon">💧</div>
+        <div class="station-metric-label">Humedad</div>
+        <div class="station-metric-value" id="st-humidity">--</div>
+        <div class="station-metric-unit">%</div>
+      </div>
+      <div class="station-metric">
+        <div class="station-metric-icon">🌧</div>
+        <div class="station-metric-label">Lluvia hoy</div>
+        <div class="station-metric-value" id="st-rain-day">--</div>
+        <div class="station-metric-unit">mm</div>
+      </div>
+      <div class="station-metric">
+        <div class="station-metric-icon">⛈</div>
+        <div class="station-metric-label">Lluvia/hora</div>
+        <div class="station-metric-value" id="st-rain-rate">--</div>
+        <div class="station-metric-unit">mm/h</div>
+      </div>
+      <div class="station-metric">
+        <div class="station-metric-icon">💨</div>
+        <div class="station-metric-label">Viento</div>
+        <div class="station-metric-value" id="st-wind">--</div>
+        <div class="station-metric-unit">km/h</div>
+      </div>
+      <div class="station-metric">
+        <div class="station-metric-icon">🌬</div>
+        <div class="station-metric-label">Ráfaga</div>
+        <div class="station-metric-value" id="st-gust">--</div>
+        <div class="station-metric-unit">km/h</div>
+      </div>
+      <div class="station-metric">
+        <div class="station-metric-icon">🧭</div>
+        <div class="station-metric-label">Dir. Viento</div>
+        <div class="station-metric-value" id="st-winddir">--</div>
+        <div class="station-metric-unit">grados</div>
+      </div>
+      <div class="station-metric">
+        <div class="station-metric-icon">📊</div>
+        <div class="station-metric-label">Presión</div>
+        <div class="station-metric-value" id="st-pressure">--</div>
+        <div class="station-metric-unit">hPa</div>
+      </div>
+      <div class="station-metric">
+        <div class="station-metric-icon">☀️</div>
+        <div class="station-metric-label">Radiación UV</div>
+        <div class="station-metric-value" id="st-uv">--</div>
+        <div class="station-metric-unit">índice</div>
+      </div>
+    </div>
+    <div class="station-last-update">🕐 Última lectura: <span id="st-updated">cargando...</span></div>
+  </div>
 
   <!-- City tabs -->
   <div class="city-tabs">
@@ -760,7 +903,7 @@
 </main>
 
 <footer>
-  WeatherSLP — Datos: <a href="https://open-meteo.com" style="color:var(--accent); text-decoration:none;">Open-Meteo API</a> (gratuito, sin key) · Mapas: <a href="https://openweathermap.org" style="color:var(--accent); text-decoration:none;">OpenWeatherMap</a> · <span id="updateTime">Actualizado: --</span>
+  WeatherSLP — Datos: <a href="https://open-meteo.com" style="color:var(--accent); text-decoration:none;">Open-Meteo API</a> · Estación: <a href="https://ambientweather.net" style="color:var(--accent3); text-decoration:none;">Ambient Weather</a> · Mapas: <a href="https://openweathermap.org" style="color:var(--accent); text-decoration:none;">OpenWeatherMap</a> · <span id="updateTime">Actualizado: --</span>
 </footer>
 
 <script>
@@ -1148,7 +1291,73 @@ async function init() {
   }, 600000);
 }
 
+// ============================================================
+// AMBIENT WEATHER STATION
+// ============================================================
+const AW_API_KEY = 'e22e26d5a7ba4d9ca1215f11912f9c3928431ba094a54cc1acdf59cfae464650';
+const AW_APP_KEY = '941441acb70f4615992c566de1b52008eddd4d46b8084516aea92a84d87c75f1';
+
+function mphToKmh(mph) { return (mph * 1.60934).toFixed(1); }
+function fToC(f) { return ((f - 32) * 5/9).toFixed(1); }
+function inToMm(inch) { return (inch * 25.4).toFixed(1); }
+function inHgToHpa(inHg) { return (inHg * 33.8639).toFixed(1); }
+
+async function fetchStation() {
+  try {
+    const url = `https://api.ambientweather.net/v1/devices?applicationKey=${AW_APP_KEY}&apiKey=${AW_API_KEY}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Station error');
+    const devices = await res.json();
+    if (!devices.length) throw new Error('No devices');
+    const d = devices[0].lastData;
+
+    // Temperature
+    if (d.tempf !== undefined) document.getElementById('st-temp').textContent = fToC(d.tempf);
+    if (d.feelsLike !== undefined) document.getElementById('st-feels').textContent = fToC(d.feelsLike);
+
+    // Humidity
+    if (d.humidity !== undefined) document.getElementById('st-humidity').textContent = d.humidity;
+
+    // Rain
+    if (d.dailyrainin !== undefined) document.getElementById('st-rain-day').textContent = inToMm(d.dailyrainin);
+    if (d.rainratein !== undefined) document.getElementById('st-rain-rate').textContent = inToMm(d.rainratein);
+
+    // Wind
+    if (d.windspeedmph !== undefined) document.getElementById('st-wind').textContent = mphToKmh(d.windspeedmph);
+    if (d.windgustmph !== undefined) document.getElementById('st-gust').textContent = mphToKmh(d.windgustmph);
+    if (d.winddir !== undefined) document.getElementById('st-winddir').textContent = d.winddir + '°';
+
+    // Pressure
+    if (d.baromrelin !== undefined) document.getElementById('st-pressure').textContent = inHgToHpa(d.baromrelin);
+
+    // UV
+    if (d.uv !== undefined) document.getElementById('st-uv').textContent = d.uv;
+
+    // Last update
+    if (d.dateutc) {
+      const lastUpdate = new Date(d.dateutc);
+      document.getElementById('st-updated').textContent = lastUpdate.toLocaleTimeString('es-MX') + ' · ' + lastUpdate.toLocaleDateString('es-MX');
+    }
+
+    // Status online
+    const statusEl = document.getElementById('stationStatus');
+    statusEl.classList.remove('offline');
+    statusEl.innerHTML = '<span class="live-dot"></span> EN VIVO';
+
+  } catch(e) {
+    const statusEl = document.getElementById('stationStatus');
+    statusEl.classList.add('offline');
+    statusEl.innerHTML = '⚠ Sin señal';
+    document.getElementById('st-updated').textContent = 'No se pudo conectar con la estación';
+    console.error('Station error:', e);
+  }
+}
+
 init();
+
+// Fetch station immediately and every 5 minutes
+fetchStation();
+setInterval(fetchStation, 300000);
 </script>
 </body>
 </html>
