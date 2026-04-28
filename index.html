@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WeatherSLP — Pronóstico en Tiempo Real</title>
+<title>GarLo Weather Station — Pronóstico en Tiempo Real</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -21,6 +21,37 @@
     --muted: #5a7a99;
     --card-glow: 0 0 30px rgba(0,212,255,0.08);
   }
+
+  body.light-mode {
+    --bg: #f0f4f8;
+    --surface: #ffffff;
+    --surface2: #e8eef5;
+    --border: #c8d8e8;
+    --accent: #0077cc;
+    --accent2: #e85500;
+    --accent3: #00994d;
+    --text: #0a1628;
+    --muted: #6688aa;
+    --card-glow: 0 0 30px rgba(0,119,204,0.08);
+  }
+
+  body.light-mode .atmo-blob { opacity: 0.06; }
+  body.light-mode body::before { opacity: 0.5; }
+
+  .theme-toggle {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text);
+    display: flex; align-items: center; gap: 6px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -679,7 +710,7 @@
 <!-- Loading -->
 <div class="loading-overlay" id="loadingOverlay">
   <div class="loading-spinner"></div>
-  <div class="loading-text">WeatherSLP — Obteniendo clima en tiempo real...</div>
+  <div class="loading-text">GarLo Weather Station — Obteniendo clima en tiempo real...</div>
 </div>
 
 <!-- Alerts toast container -->
@@ -688,7 +719,7 @@
 <header>
   <div class="logo">
     <div class="logo-icon">🌦</div>
-    <div class="logo-text">Weather<span>SLP</span></div>
+    <div class="logo-text">GarLo <span>Weather</span></div>
   </div>
   <div class="search-bar">
     <span style="color:var(--muted); font-size:15px;">🔍</span>
@@ -700,6 +731,7 @@
     <span id="liveTime">--:--:--</span><br>
     <span id="liveDate" style="font-size:11px;">...</span>
   </div>
+  <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Modo oscuro</button>
 </header>
 
 <main>
@@ -910,47 +942,86 @@
     <!-- filled by JS -->
   </div>
 
-  <!-- Maps -->
-  <div class="maps-grid">
-    <!-- Satellite map -->
-    <div class="map-card">
-      <div class="map-header">
-        <div class="map-title">
-          🛰 Mapa Satelital
-          <span class="map-badge">EN VIVO</span>
+  <!-- Mapa Meteorológico Completo -->
+  <div class="map-card" style="margin-bottom:20px;">
+    <div class="map-header" style="flex-wrap:wrap; gap:10px;">
+      <div class="map-title">
+        🗺 Mapa Meteorológico
+        <span class="map-badge">TIEMPO REAL</span>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <!-- Base map -->
+        <div style="display:flex; gap:4px;">
+          <button class="map-btn active" onclick="setBaseLayer('dark',this)" id="base-dark">🌑 Oscuro</button>
+          <button class="map-btn" onclick="setBaseLayer('light',this)" id="base-light">☀️ Claro</button>
+          <button class="map-btn" onclick="setBaseLayer('satellite',this)" id="base-sat">🛰 Satélite</button>
         </div>
-        <div class="map-controls">
-          <button class="map-btn active" onclick="setSatLayer('satellite', this)">Satélite</button>
-          <button class="map-btn" onclick="setSatLayer('topo', this)">Topo</button>
-          <button class="map-btn" onclick="setSatLayer('streets', this)">Mapa</button>
+        <div style="width:1px; height:24px; background:var(--border);"></div>
+        <!-- Weather layers -->
+        <div style="display:flex; gap:4px; flex-wrap:wrap;">
+          <button class="map-btn layer-toggle active" onclick="toggleLayer('rain',this)" id="layer-rain">🌧 Lluvia</button>
+          <button class="map-btn layer-toggle" onclick="toggleLayer('clouds',this)" id="layer-clouds">☁️ Nubes</button>
+          <button class="map-btn layer-toggle" onclick="toggleLayer('wind',this)" id="layer-wind">💨 Viento</button>
+          <button class="map-btn layer-toggle" onclick="toggleLayer('temp',this)" id="layer-temp">🌡 Temp</button>
+          <button class="map-btn layer-toggle" onclick="toggleLayer('pressure',this)" id="layer-pressure">📊 Presión</button>
         </div>
       </div>
-      <div class="map-container" id="satelliteMap"></div>
     </div>
 
-    <!-- Radar map -->
-    <div class="map-card">
-      <div class="map-header">
-        <div class="map-title">
-          🌧 Radar de Precipitaciones
-          <span class="map-badge rain">TIEMPO REAL</span>
-        </div>
-        <div class="map-controls">
-          <button class="map-btn active" onclick="setRadarLayer('rain', this)">Lluvia</button>
-          <button class="map-btn" onclick="setRadarLayer('clouds', this)">Nubes</button>
-          <button class="map-btn" onclick="setRadarLayer('wind', this)">Viento</button>
-          <button class="map-btn" onclick="setRadarLayer('temp', this)">Temp</button>
+    <!-- Layer legend bar -->
+    <div id="layerLegendBar" style="padding:8px 16px; border-bottom:1px solid var(--border); display:flex; gap:16px; flex-wrap:wrap; align-items:center; font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted);">
+      <div id="legendRain" class="layer-legend-item">
+        <span style="font-weight:700; color:#5599ff;">🌧 LLUVIA</span>
+        <div style="display:flex; align-items:center; gap:6px; margin-top:2px;">
+          <span>Débil</span>
+          <div style="width:80px; height:6px; border-radius:3px; background:linear-gradient(to right,#0000ff,#00ffff,#00ff00,#ffff00,#ff6600,#ff0000);"></div>
+          <span>Fuerte</span>
         </div>
       </div>
-      <div class="map-container" id="radarMap"></div>
-      <div class="radar-legend">
-        <span>Débil</span>
-        <div style="flex:1;">
-          <div class="legend-gradient"></div>
-          <div class="legend-labels"><span>0</span><span>10</span><span>20</span><span>35</span><span>50+</span><span>mm/h</span></div>
+      <div id="legendClouds" class="layer-legend-item" style="display:none;">
+        <span style="font-weight:700; color:#aaaacc;">☁️ NUBES</span>
+        <div style="display:flex; align-items:center; gap:6px; margin-top:2px;">
+          <span>Despejado</span>
+          <div style="width:80px; height:6px; border-radius:3px; background:linear-gradient(to right,transparent,#aaaacc,#555577);"></div>
+          <span>Nublado</span>
         </div>
-        <span>Fuerte</span>
       </div>
+      <div id="legendWind" class="layer-legend-item" style="display:none;">
+        <span style="font-weight:700; color:#00ff9d;">💨 VIENTO</span>
+        <div style="display:flex; align-items:center; gap:6px; margin-top:2px;">
+          <span>Calma</span>
+          <div style="width:80px; height:6px; border-radius:3px; background:linear-gradient(to right,#00ff9d,#ffff00,#ff6b35,#ff0000);"></div>
+          <span>Fuerte</span>
+        </div>
+      </div>
+      <div id="legendTemp" class="layer-legend-item" style="display:none;">
+        <span style="font-weight:700; color:#ff6b35;">🌡 TEMPERATURA</span>
+        <div style="display:flex; align-items:center; gap:6px; margin-top:2px;">
+          <span>Frío</span>
+          <div style="width:80px; height:6px; border-radius:3px; background:linear-gradient(to right,#0000ff,#00ffff,#00ff00,#ffff00,#ff0000);"></div>
+          <span>Calor</span>
+        </div>
+      </div>
+      <div id="legendPressure" class="layer-legend-item" style="display:none;">
+        <span style="font-weight:700; color:#cc88ff;">📊 PRESIÓN / FRENTES</span>
+        <div style="display:flex; gap:10px; margin-top:2px; align-items:center;">
+          <span style="color:#4488ff;">▬▬ Frente frío</span>
+          <span style="color:#ff4444;">▬▬ Frente cálido</span>
+          <span style="color:#aa44aa;">▬▬ Frente ocluido</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="map-container" id="mainWeatherMap" style="height:500px;"></div>
+
+    <!-- Front legend -->
+    <div style="padding:10px 16px; border-top:1px solid var(--border); display:flex; gap:16px; flex-wrap:wrap; font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted); align-items:center;">
+      <span style="font-weight:700;">SEÑALÉTICA:</span>
+      <span>🔵 Ciudad monitoreada</span>
+      <span style="color:#4488ff;">❄ Frente frío (línea azul)</span>
+      <span style="color:#ff4444;">♨ Frente cálido (línea roja)</span>
+      <span style="color:#aa44aa;">🌀 Sistema de baja presión</span>
+      <span style="color:#ff9900;">⬆ Sistema de alta presión</span>
     </div>
   </div>
 
@@ -1031,7 +1102,7 @@
 </main>
 
 <footer>
-  WeatherSLP — Datos: <a href="https://open-meteo.com" style="color:var(--accent); text-decoration:none;">Open-Meteo API</a> · Estación: <a href="https://ambientweather.net" style="color:var(--accent3); text-decoration:none;">Ambient Weather</a> · Mapas: <a href="https://openweathermap.org" style="color:var(--accent); text-decoration:none;">OpenWeatherMap</a> · <span id="updateTime">Actualizado: --</span>
+  GarLo Weather Station — Datos: <a href="https://open-meteo.com" style="color:var(--accent); text-decoration:none;">Open-Meteo API</a> · Estación: <a href="https://ambientweather.net" style="color:var(--accent3); text-decoration:none;">Ambient Weather</a> · Mapas: <a href="https://openweathermap.org" style="color:var(--accent); text-decoration:none;">OpenWeatherMap</a> · <span id="updateTime">Actualizado: --</span>
 </footer>
 
 <script>
@@ -1293,58 +1364,137 @@ function updateUI(data, city, country) {
 // ============================================================
 // MAPS
 // ============================================================
-const TILE_URLS = {
-  satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-  topo: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-  streets: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-};
+// ============================================================
+// THEME TOGGLE
+// ============================================================
+let isDarkMode = true;
+function toggleTheme() {
+  isDarkMode = !isDarkMode;
+  document.body.classList.toggle('light-mode', !isDarkMode);
+  document.getElementById('themeBtn').textContent = isDarkMode ? '🌙 Modo oscuro' : '☀️ Modo claro';
+  // Update base map tile if needed
+  if (currentBaseLayer === 'dark' || currentBaseLayer === 'light') {
+    const autoBase = isDarkMode ? 'dark' : 'light';
+    setBaseLayer(autoBase, document.getElementById(`base-${autoBase}`));
+  }
+}
 
-const OWM_LAYERS = {
-  rain: 'precipitation_new',
-  clouds: 'clouds_new',
-  wind: 'wind_new',
-  temp: 'temp_new'
-};
-
-// Public OWM key commonly used in demos (limited but functional for tiles)
+// ============================================================
+// UNIFIED MAP SYSTEM
+// ============================================================
 const OWM_KEY = '439d4b804bc8187953eb36d2a8c26a02';
 
+const BASE_TILES = {
+  dark:      'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+  light:     'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+  satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+};
+
+const OWM_LAYER_NAMES = {
+  rain:     'precipitation_new',
+  clouds:   'clouds_new',
+  wind:     'wind_new',
+  temp:     'temp_new',
+  pressure: 'pressure_new'
+};
+
+let mainMap = null;
+let baseLayer = null;
+let weatherLayers = {};
+let activeLayers = new Set(['rain']);
+let currentBaseLayer = 'dark';
+let cityMarkers = [];
+
 function initMaps() {
-  // Satellite map
-  satMap = L.map('satelliteMap', { zoomControl: true, attributionControl: false }).setView([currentLat, currentLon], 6);
-  satLayer = L.tileLayer(TILE_URLS.satellite, { maxZoom: 18 }).addTo(satMap);
+  mainMap = L.map('mainWeatherMap', {
+    zoomControl: true,
+    attributionControl: false
+  }).setView([currentLat, currentLon], 5);
 
-  // Radar map
-  radarMap = L.map('radarMap', { zoomControl: true, attributionControl: false }).setView([currentLat, currentLon], 5);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 18 }).addTo(radarMap);
-  radarLayer = L.tileLayer(`https://tile.openweathermap.org/map/${OWM_LAYERS.rain}/{z}/{x}/{y}.png?appid=${OWM_KEY}`, {
-    opacity: 0.75, maxZoom: 18
-  }).addTo(radarMap);
+  // Base layer
+  baseLayer = L.tileLayer(BASE_TILES.dark, { maxZoom: 18 }).addTo(mainMap);
 
-  // Style map attribution
-  L.control.attribution({ prefix: '' }).addTo(satMap);
+  // All OWM weather layers (start with rain active)
+  Object.entries(OWM_LAYER_NAMES).forEach(([key, layerName]) => {
+    weatherLayers[key] = L.tileLayer(
+      `https://tile.openweathermap.org/map/${layerName}/{z}/{x}/{y}.png?appid=${OWM_KEY}`,
+      { opacity: 0.75, maxZoom: 18, zIndex: 200 }
+    );
+  });
+  weatherLayers['rain'].addTo(mainMap);
+
+  // Add city markers
+  addCityMarkers();
 }
 
-function setSatLayer(type, btn) {
-  document.querySelectorAll('#satelliteMap').forEach(() => {});
-  document.querySelectorAll('.map-card:first-child .map-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  if (satLayer) satMap.removeLayer(satLayer);
-  satLayer = L.tileLayer(TILE_URLS[type], { maxZoom: 18 }).addTo(satMap);
+function addCityMarkers() {
+  // Clear old
+  cityMarkers.forEach(m => mainMap.removeLayer(m));
+  cityMarkers = [];
+
+  const markerStyle = (name, flag) => L.divIcon({
+    html: `<div style="
+      background:var(--surface,#0d1a2a);
+      border:2px solid var(--accent,#00d4ff);
+      border-radius:20px;
+      padding:3px 8px;
+      font-family:Syne,sans-serif;
+      font-size:11px;
+      font-weight:700;
+      color:var(--text,#e8f4ff);
+      white-space:nowrap;
+      box-shadow:0 2px 10px rgba(0,0,0,0.4);
+      display:flex; align-items:center; gap:4px;
+    ">${flag} ${name}</div>`,
+    className: '',
+    iconAnchor: [40, 12]
+  });
+
+  const cities = [
+    { lat: 22.1565, lon: -100.9855, name: 'SLP', flag: '🇲🇽' },
+    { lat: 22.1225, lon: -100.6375, name: 'San Cayetano', flag: '🇲🇽' },
+    { lat: 27.4769, lon: -99.5122,  name: 'Nuevo Laredo', flag: '🇲🇽' },
+    { lat: 27.5306, lon: -99.4803,  name: 'Laredo TX', flag: '🇺🇸' }
+  ];
+
+  cities.forEach(c => {
+    const m = L.marker([c.lat, c.lon], { icon: markerStyle(c.name, c.flag) }).addTo(mainMap);
+    m.bindPopup(`<b>${c.flag} ${c.name}</b>`);
+    cityMarkers.push(m);
+  });
 }
 
-function setRadarLayer(type, btn) {
-  document.querySelectorAll('.map-card:last-child .map-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  if (radarLayer) radarMap.removeLayer(radarLayer);
-  radarLayer = L.tileLayer(`https://tile.openweathermap.org/map/${OWM_LAYERS[type]}/{z}/{x}/{y}.png?appid=${OWM_KEY}`, {
-    opacity: 0.75, maxZoom: 18
-  }).addTo(radarMap);
+function setBaseLayer(type, btn) {
+  currentBaseLayer = type;
+  document.querySelectorAll('[id^="base-"]').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  if (baseLayer) mainMap.removeLayer(baseLayer);
+  baseLayer = L.tileLayer(BASE_TILES[type], { maxZoom: 18 }).addTo(mainMap);
+  baseLayer.setZIndex(1);
+  // Re-add weather layers on top
+  activeLayers.forEach(key => {
+    if (weatherLayers[key]) weatherLayers[key].addTo(mainMap);
+  });
+}
+
+function toggleLayer(type, btn) {
+  // Show/hide the correct legend
+  const legendMap = { rain:'legendRain', clouds:'legendClouds', wind:'legendWind', temp:'legendTemp', pressure:'legendPressure' };
+  if (activeLayers.has(type)) {
+    activeLayers.delete(type);
+    if (weatherLayers[type]) mainMap.removeLayer(weatherLayers[type]);
+    btn.classList.remove('active');
+    document.getElementById(legendMap[type]).style.display = 'none';
+  } else {
+    activeLayers.add(type);
+    if (weatherLayers[type]) weatherLayers[type].addTo(mainMap);
+    btn.classList.add('active');
+    document.getElementById(legendMap[type]).style.display = 'block';
+  }
 }
 
 function centerMaps(lat, lon) {
-  satMap.setView([lat, lon], 7);
-  radarMap.setView([lat, lon], 5);
+  if (mainMap) mainMap.setView([lat, lon], 5);
 }
 
 // ============================================================
@@ -1521,7 +1671,7 @@ function showToast(type, title, msg, city) {
 
   // Browser notification
   if (Notification.permission === 'granted') {
-    new Notification(`⚠️ WeatherSLP — ${title}`, {
+    new Notification(`⚠️ GarLo Weather Station — ${title}`, {
       body: `${city}: ${msg}`,
       icon: '🌩'
     });
